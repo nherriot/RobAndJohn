@@ -19,4 +19,3 @@ class RobandjohnItem(scrapy.Item):
     spider = Field()
     server = Field()
     date = Field()
-    
