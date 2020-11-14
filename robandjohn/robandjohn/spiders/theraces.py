@@ -1,12 +1,54 @@
-import scrapy
 
+import socket
+from datetime import datetime, timezone
+
+import scrapy
+from robandjohn.items import HorseRaceItem
 
 class TheracesSpider(scrapy.Spider):
     name = 'theraces'
+
+    # Set to 'False' to ignore robot.txt file.
+    custom_settings = {
+        "ROBOTSTXT_OBEY": "True",
+    }
+
     allowed_domains = ['www.attheraces.com/']
     start_urls = ['https://www.attheraces.com/racecard/Newcastle/01-June-2020/1300']
 
+    housekeeping = {}
+
     def parse(self, response):
+
+        # Lets instantiate one of our horse race items.
+        item = HorseRaceItem()
+
+        # First lets do housekeeping data for this web spider scrape. We need to check it is only done once.
+        # So only happens for the first asynchronous block of code to run (scrapy uses twisted!). Store the value in
+        # the class attribute so that it can be used by every item that is parsed.
+        if not self.housekeeping:
+            self.housekeeping["url"] = response.url
+            self.housekeeping["project"] = self.settings.get("BOT_NAME")
+            self.housekeeping["spider"] = self.name
+            self.housekeeping["server"] = socket.gethostname()
+            self.housekeeping["date"] = (
+                datetime.now()
+                .replace(tzinfo=timezone.utc)
+                .strftime("%d %B %Y %H:%M:%S")
+            )
+            self.logger.info(
+                f"*** The housekeeping attributes are now data filled with: {self.housekeeping} ***"
+            )
+
+        # Set housekeeping attributes in the HorseRaceItem
+        item['url'] = response.url
+        item['project'] = self.settings.get("BOT_NAME")
+        item['spider'] = self.name
+        item['server'] = socket.gethostname()
+        item['date'] = (                datetime.now()
+                .replace(tzinfo=timezone.utc)
+                .strftime("%d %B %Y %H:%M:%S")
+            )
 
         # XPaths for race details
         race_time = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/b/text()').extract()[0]
@@ -14,6 +56,12 @@ class TheracesSpider(scrapy.Spider):
         race_class = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/p[2]/text()').extract()[0].strip()
         start_time = response.xpath('//div[@class="card-footer__content"]/div/span/span/text()').extract()[0]
         winning_time = response.xpath('//div[@class="card-footer__content"]/div/span/span[2]/text()').extract()[0]
+
+        item['race_time'] = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/b/text()').extract()[0]
+        item['race_date_and_place'] = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/text()').extract()[1].strip()
+        item['race_class'] = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/p[2]/text()').extract()[0].strip()
+        item['race_start_time'] = response.xpath('//div[@class="card-footer__content"]/div/span/span/text()').extract()[0]
+        item['race_winning_time'] = response.xpath('//div[@class="card-footer__content"]/div/span/span[2]/text()').extract()[0]
 
         self.logger.info(f"\n*** Race details ***\n  Race time: {race_time}\n  Race Course: {race_date_and_place}\n  Race class: {race_class}\n  Race Start Time: {start_time}\n  Race Winning Time: {winning_time}")
 
@@ -64,3 +112,5 @@ class TheracesSpider(scrapy.Spider):
         for horse_strip, horse_image in zip(horse_colours, horse_urls):
             self.logger.info(f" Horse strip colours is : {horse_strip}")
             self.logger.info(f"and horse image is: {horse_image}")
+
+        return item
