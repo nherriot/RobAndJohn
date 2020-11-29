@@ -3,6 +3,8 @@ import socket
 from datetime import datetime, timezone
 
 import scrapy
+from scrapy.loader import ItemLoader
+from itemloaders.processors import Join, MapCompose, TakeFirst
 from robandjohn.items import HorseRaceItem
 
 class TheracesSpider(scrapy.Spider):
@@ -21,7 +23,7 @@ class TheracesSpider(scrapy.Spider):
     def parse(self, response):
 
         # Lets instantiate one of our horse race items.
-        item = HorseRaceItem()
+        itemLoader = ItemLoader(item=HorseRaceItem(), response=response)
 
         # First lets do housekeeping data for this web spider scrape. We need to check it is only done once.
         # So only happens for the first asynchronous block of code to run (scrapy uses twisted!). Store the value in
@@ -41,76 +43,28 @@ class TheracesSpider(scrapy.Spider):
             )
 
         # Set housekeeping attributes in the HorseRaceItem
-        item['url'] = response.url
-        item['project'] = self.settings.get("BOT_NAME")
-        item['spider'] = self.name
-        item['server'] = socket.gethostname()
-        item['date'] = (                datetime.now()
-                .replace(tzinfo=timezone.utc)
-                .strftime("%d %B %Y %H:%M:%S")
-            )
+        itemLoader.add_value('url', response.url)
+        itemLoader.add_value('project', self.settings.get("BOT_NAME"))
+        itemLoader.add_value('spider', self.name)
+        itemLoader.add_value('server', socket.gethostname())
+        itemLoader.add_value('date', datetime.now().replace(tzinfo=timezone.utc).strftime("%d %B %Y %H:%M:%S"))
 
         # XPaths for race details
-        race_time = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/b/text()').extract()[0]
-        race_date_and_place = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/text()').extract()[1].strip()
-        race_class = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/p[2]/text()').extract()[0].strip()
-        start_time = response.xpath('//div[@class="card-footer__content"]/div/span/span/text()').extract()[0]
-        winning_time = response.xpath('//div[@class="card-footer__content"]/div/span/span[2]/text()').extract()[0]
-
-        item['race_time'] = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/b/text()').extract()[0]
-        item['race_date_and_place'] = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/text()').extract()[1].strip()
-        item['race_class'] = response.xpath('//div[@class="race-header__content js-race-header__content"]/div/div/div/div/p[2]/text()').extract()[0].strip()
-        item['race_start_time'] = response.xpath('//div[@class="card-footer__content"]/div/span/span/text()').extract()[0]
-        item['race_winning_time'] = response.xpath('//div[@class="card-footer__content"]/div/span/span[2]/text()').extract()[0]
-
-        self.logger.info(f"\n*** Race details ***\n  Race time: {race_time}\n  Race Course: {race_date_and_place}\n  Race class: {race_class}\n  Race Start Time: {start_time}\n  Race Winning Time: {winning_time}")
-
+        itemLoader.add_xpath('race_time', '//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/b/text()')
+        itemLoader.add_xpath('race_date_and_place', '//div[@class="race-header__content js-race-header__content"]/div/div/div/div/h1/text()', MapCompose(str.strip), lambda  i: i[1])
+        itemLoader.add_xpath('race_class', '//div[@class="race-header__content js-race-header__content"]/div/div/div/div/p[2]/text()', MapCompose(str.strip), lambda i: i[0])
+        itemLoader.add_xpath('race_start_time', '//div[@class="card-footer__content"]/div/span/span/text()', lambda i: i[0])
+        itemLoader.add_xpath('race_winning_time', '//div[@class="card-footer__content"]/div/span/span[2]/text()', lambda i: i[0])
 
         # XPaths for horse and rider details
-        positions_selector = response.xpath('//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-no-draw"]//span/text()')
-        dist_btn = response.xpath('//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--form text-align--center"]/text()').extract()
-        horse_colours = response.xpath('//div[@class="horse"]//img/@title').extract()
-        horse_urls = response.xpath('//div[@class="horse"]//img/@src').extract()
-        horse_names = response.xpath('//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div/div/h2/a/text()').extract()
-        race_descriptions = response.xpath('//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/p/span/text()').extract()
-        race_ods = response.xpath('//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div[2]/text()').extract()
-        race_age_weight = response.xpath('//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div[3]/text()').extract()
-        race_or = response.xpath('//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div[4]/span/text()').extract()
+        itemLoader.add_xpath('position', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-no-draw"]//span/text()')
+        itemLoader.add_xpath('horse_url', '//div[@class="horse"]//img/@src')
+        itemLoader.add_xpath('race_or', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div[4]/span[1]/text()')
+        itemLoader.add_xpath('horse_colour', '//div[@class="horse"]//img/@title')
+        itemLoader.add_xpath('raced_description', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/p/span/text()', MapCompose(str.strip))
+        itemLoader.add_xpath('horse_name', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div/div/h2/a/text()', MapCompose(str.strip, lambda i: i if(len(i)>=1) else None))
+        itemLoader.add_xpath('dst_btn', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--form text-align--center"]/text()', MapCompose(lambda i: i.replace('\r', '').replace('\n', ''), str.strip))
+        itemLoader.add_xpath('race_ods', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div[2]/text()', MapCompose(lambda i: i.replace('\r', '').replace('\n', ''), str.strip))
+        itemLoader.add_xpath('race_age_weight', '//*[@id="tab-full-result"]/div/div/div/div[2]//div/div/div[4]/div/div[3]/text()', MapCompose(str.split))
 
-
-        for o_r in race_or:
-            self.logger.info(f"Race OR is; {o_r}")
-
-        for age_weight in race_age_weight:
-            clean_age_weight = age_weight.strip().replace('\n', '')
-            self.logger.info(f"Race age and weight is: {clean_age_weight}")
-
-        for ods in race_ods:
-            ods_clean = ods.strip().replace('\n','')
-            self.logger.info(f"Race ods are: {ods_clean}")
-
-        for race in race_descriptions:
-            self.logger.info(f"Race description: {race.strip()}")
-
-        cleaned_horse_names = []
-        for horse in horse_names:
-            self.logger.info(f"Horse name is: {horse.strip()} *** String size is: {len(horse.strip())} ***")
-            if len(horse.strip()) >= 1:
-                # Empty list string from padding characters like /n/r so we can ignore those
-                cleaned_horse_names.append(horse.strip())
-
-        self.logger.info(f"\n***Cleaned horse names***\n")
-        for horse in cleaned_horse_names:
-            self.logger.info(f"Horse name is: {horse.strip()}")
-
-        for db in dist_btn:
-            self.logger.info(f"Dist Bin is: {db.strip()}")
-
-        for position in positions_selector:
-            self.logger.info(f"Position number is: {position.extract()}")
-
-        for horse_strip, horse_image in zip(horse_colours, horse_urls):
-            self.logger.info(f" Horse strip colours is : {horse_strip}")
-            self.logger.info(f"and horse image is: {horse_image}")
-
-        return item
+        return itemLoader.load_item()
