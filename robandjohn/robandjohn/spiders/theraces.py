@@ -68,8 +68,6 @@ class TheracesSpider(scrapy.Spider):
 
     def parse_item(self, items):
 
-        print(f"parse item items are: {items}")
-
         return items.load_item()
 
 

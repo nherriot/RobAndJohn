@@ -20,7 +20,7 @@ def write_race_file(summary, race_details):
     else:
 
         if os.path.exists(file_name):
-            print("File exists already updating")
+            logging.debug("File exists already updating")
             with open(file_name, 'a') as updating_file:
                 updating_file.write(f" \n********** Updating File - Written at: {datetime.now()} **********")
                 updating_file.write(f" \n\nRace Details\n")

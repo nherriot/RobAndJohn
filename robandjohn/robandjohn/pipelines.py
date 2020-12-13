@@ -53,8 +53,6 @@ class TheRacesPipeline:
                                            horse_ages,
                                            horse_weights,
                                            item['horse_colour'])
-                # for a, b, c, d, e, f, g in race_details:
-                #     logging.debug(f"Zipped items are: {a}   and   {b}  and {c.replace(' ', '')}  and {d}  and {e}  and {f}")
 
                 write_race_file(race_summary, race_details)
 
