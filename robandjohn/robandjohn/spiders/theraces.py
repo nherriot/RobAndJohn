@@ -34,13 +34,9 @@ class TheracesSpider(scrapy.Spider):
             self.housekeeping["spider"] = self.name
             self.housekeeping["server"] = socket.gethostname()
             self.housekeeping["date"] = (
-                datetime.now()
-                .replace(tzinfo=timezone.utc)
-                .strftime("%d %B %Y %H:%M:%S")
-            )
-            self.logger.info(
-                f"*** The housekeeping attributes are now data filled with: {self.housekeeping} ***"
-            )
+                datetime.now().replace(tzinfo=timezone.utc).strftime("%d %B %Y %H:%M:%S"))
+            # self.logger.info(
+            #     f"*** The housekeeping attributes are now data filled with: {self.housekeeping} ***")
 
         # Set housekeeping attributes in the HorseRaceItem
         itemLoader.add_value('url', response.url)
@@ -64,7 +60,18 @@ class TheracesSpider(scrapy.Spider):
         itemLoader.add_xpath('raced_description', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/p/span/text()', MapCompose(str.strip))
         itemLoader.add_xpath('horse_name', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div/div/h2/a/text()', MapCompose(str.strip, lambda i: i if(len(i)>=1) else None))
         itemLoader.add_xpath('dst_btn', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--form text-align--center"]/text()', MapCompose(lambda i: i.replace('\r', '').replace('\n', ''), str.strip))
-        itemLoader.add_xpath('race_ods', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div[2]/text()', MapCompose(lambda i: i.replace('\r', '').replace('\n', ''), str.strip))
+        itemLoader.add_xpath('race_ods', '//div[@class="tabs__content"]//div[@class="card-body"]//div[@class="card-entry "]//div[@class="card-cell card-cell--fill unpadded-left"]/div/div[2]/text()', MapCompose(lambda i: i.replace('\r', '').replace('\n', '').replace(' ', ''), str.strip))
         itemLoader.add_xpath('race_age_weight', '//*[@id="tab-full-result"]/div/div/div/div[2]//div/div/div[4]/div/div[3]/text()', MapCompose(str.split))
 
-        return itemLoader.load_item()
+        #return itemLoader.load_item()
+        return self.parse_item(itemLoader)
+
+    def parse_item(self, items):
+
+        print(f"parse item items are: {items}")
+
+        return items.load_item()
+
+
+
+
