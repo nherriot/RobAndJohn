@@ -23,13 +23,21 @@ def write_race_file(summary, race_details):
             logging.debug("File exists already updating")
             with open(file_name, 'a') as updating_file:
                 updating_file.write(f" \n********** Updating File - Written at: {datetime.now()} **********")
-                updating_file.write(f" \n\nRace Details\n")
-                updating_file.write(" Position   Horse Name             Odds       Age   Weight   Dst Btn\n")
+                updating_file.write(f" \n\nRace Details (Short\n")
+                # updating_file.write(" Position   Horse Name             Odds       Age   Weight   Dst Btn\n")
+                # updating_file.write(
+                #     " -----------------------------------------------------------------------------------\n")
+                #
+                # for name, position, odds, btn, age, weight, colour in race_details:
+                #     updating_file.write(f"   {position:<8} {name:<22} {odds:<10} {age:<5} {weight:<10} {btn:<1} \n")
+                # updating_file.write(
+                #     " -----------------------------------------------------------------------------------\n")
+                updating_file.write(" Position   Number  Horse Name             Odds\n")
                 updating_file.write(
                     " -----------------------------------------------------------------------------------\n")
-
-                for name, position, odds, btn, age, weight, colour in race_details:
-                    updating_file.write(f"   {position:<8} {name:<22} {odds:<10} {age:<5} {weight:<10} {btn:<1} \n")
+                equal = " = "
+                for name, number, position, odds, btn, age, weight, colour in race_details:
+                    updating_file.write(f"   {position:<10} {number:<5} {name:<22} {odds:<10} {equal:<8}\n")
                 updating_file.write(
                     " -----------------------------------------------------------------------------------\n")
 
@@ -52,16 +60,25 @@ def write_race_file(summary, race_details):
                 race_file.write(f" Scraped at:      {summary['scrape time']}\n")
                 race_file.write(
                     " -----------------------------------------------------------------------------------\n")
-                race_file.write(f" \n\nRace Details - Written at: {datetime.now()}\n")
-                race_file.write(" Position   Horse Name             Odds       Age   Weight   Dst Btn\n")
+                # race_file.write(f" \n\nRace Details (Verbose) - Written at: {datetime.now()}\n")
+                # race_file.write(" Position   Number  Horse Name             Odds       Age   Weight   Dst Btn\n")
+                # race_file.write(
+                #     " -----------------------------------------------------------------------------------\n")
+                #
+                # for name, number, position, odds, btn, age, weight, colour in race_details:
+                #     race_file.write(f"   {position:<10} {number:<5} {name:<22} {odds:<10} {age:<5} {weight:<10} {btn:<1} \n")
+                # race_file.write(
+                #     " -----------------------------------------------------------------------------------\n")
+
+                race_file.write(f" \n\nRace Details (Short) - Written at: {datetime.now()}\n")
+                race_file.write(" Position   Number  Horse Name             Odds\n")
                 race_file.write(
                     " -----------------------------------------------------------------------------------\n")
-
-                for name, position, odds, btn, age, weight, colour in race_details:
-                    race_file.write(f"   {position:<8} {name:<22} {odds:<10} {age:<5} {weight:<10} {btn:<1} \n")
+                equal = " = "
+                for name, number, position, odds, btn, age, weight, colour in race_details:
+                    race_file.write(f"   {position:<10} {number:<5} {name:<22} {odds:<10} {equal:<8}\n")
                 race_file.write(
                     " -----------------------------------------------------------------------------------\n")
-
 
 
 

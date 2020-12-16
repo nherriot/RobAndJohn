@@ -19,6 +19,7 @@ class HorseRaceItem(Item):
     horse_colour = Field()
     horse_url = Field()
     horse_name = Field()
+    horse_number = Field()
     raced_description = Field()
     race_ods = Field()
     race_age_weight = Field()
