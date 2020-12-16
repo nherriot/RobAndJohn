@@ -47,6 +47,7 @@ class TheRacesPipeline:
                         horse_weights.append(age_weight)
 
                 race_details = zip_longest(item['horse_name'],
+                                           item['horse_number'],
                                            item['position'],
                                            item['race_ods'],
                                            item['dst_btn'],

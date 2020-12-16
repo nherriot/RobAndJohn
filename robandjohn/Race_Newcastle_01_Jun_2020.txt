@@ -1,0 +1,31 @@
+ ****************************** Johns Horse Race File ******************************
+ ***********************************************************************************
+ Race Summary
+ -----------------------------------------------------------------------------------
+ Race Title:      Newcastle 01 Jun 2020
+ Race Website:    https://www.attheraces.com/racecard/Newcastle/01-June-2020/1300
+ Race Time:       13:00
+ Actual Start:     13:02:13
+ Race Class:      Class 6 | 4YO plus
+ Winning Time:     1m 41.83s
+ Spider name:     theraces
+ Scraped at:      16 December 2020 00:40:01
+ -----------------------------------------------------------------------------------
+ 
+
+Race Details (Short) - Written at: 2020-12-16 00:40:01.334963
+ Position   Number  Horse Name             Odds
+ -----------------------------------------------------------------------------------
+   1          2     Zodiakos               22/1        =      
+   2          1     Al Ozzdi               4/12Fav     =      
+   3          12    The Big House          18/1        =      
+   4          5     Celtic Artisan         40/1        =      
+   5          7     My Boy Lewis           16/1        =      
+   6          9     Stone Mason            15/8Fav     =      
+   7          3     Ghadbbaan              25/1        =      
+   8          6     Muatadel               25/1        =      
+   9          10    Curfewed               10/1        =      
+   10         4     Tiercel                12/1        =      
+   11         11    Ideal Destiny          66/1        =      
+   12         8     Heavenly Tale          5/1         =      
+ -----------------------------------------------------------------------------------
